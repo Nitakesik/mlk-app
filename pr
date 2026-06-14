@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Молочка</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="app.js"></script>
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f2f2f7;
+}
+
+header {
+    background: white;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 10px;
+}
+
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    background: #007aff;
+    color: white;
+    font-weight: bold;
+}
+
+.card {
+    background: white;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.small {
+    font-size: 13px;
+    color: #555;
+}
+
+.red { border-left: 5px solid #ff3b30; }
+.yellow { border-left: 5px solid #ffcc00; }
+.green { border-left: 5px solid #34c759; }
+
+</style>
+</head>
+
+<body>
+
+<header>Молочка</header>
+
+<div class="container">
+
+<input id="name" placeholder="Название">
+<input id="date" type="date">
+
+<button onclick="addItem()">Добавить</button>
+<button onclick="clearAll()">Удалить всё</button>
+
+<div id="list"></div>
+
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("milk")) || [];
+
+function save() {
+    localStorage.setItem("milk", JSON.stringify(data));
+}
+
+function daysLeft(date) {
+    let today = new Date();
+    let d = new Date(date);
+    return Math.ceil((d - today) / 86400000);
+}
+
+function status(days) {
+    if (days < 0) return "ПРОСРОЧЕНО";
+    if (days === 0) return "СЕГОДНЯ";
+    return "через " + days + " дн.";
+}
+
+function color(days) {
+    if (days < 0) return "red";
+    if (days <= 2) return "yellow";
+    return "green";
+}
+
+function addItem() {
+    let name = document.getElementById("name").value;
+    let date = document.getElementById("date").value;
+
+    if (!name || !date) return;
+
+    data.push({ name, date });
+    save();
+    render();
+
+    document.getElementById("name").value = "";
+    document.getElementById("date").value = "";
+}
+
+function deleteItem(i) {
+    data.splice(i, 1);
+    save();
+    render();
+}
+
+function clearAll() {
+    if (confirm("Удалить всё?")) {
+        data = [];
+        save();
+        render();
+    }
+}
+
+function render() {
+    let list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.sort((a, b) => daysLeft(a.date) - daysLeft(b.date));
+
+    data.forEach((item, i) => {
+        let days = daysLeft(item.date);
+
+        let div = document.createElement("div");
+        div.className = "card " + color(days);
+
+        div.innerHTML = `
+            <b>${item.name}</b><br>
+            <span class="small">${item.date}</span><br>
+            <span class="small">${status(days)}</span><br>
+            <button onclick="deleteItem(${i})">Удалить</button>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+render();
+
+</script>
+
+</body>
+</html>
+let data = JSON.parse(localStorage.getItem("milk")) || [];
+
+function save() {
+    localStorage.setItem("milk", JSON.stringify(data));
+}
+
+function daysLeft(date) {
+    return Math.ceil((new Date(date) - new Date()) / 86400000);
+}
+
+function getColor(days) {
+    if (days <= 1) return "red";
+    if (days <= 3) return "orange";
+    return "green";
+}
+
+function addItem() {
+    let name = document.getElementById("name").value;
+    let date = document.getElementById("date").value;
+
+    if (!name || !date) return;
+
+    data.push({ name, date });
+    save();
+    render();
+}
+
+function deleteItem(i) {
+    data.splice(i, 1);
+    save();
+    render();
+}
+
+function render() {
+    let list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.sort((a,b)=>daysLeft(a.date)-daysLeft(b.date));
+
+    data.forEach((item, i) => {
+        let days = daysLeft(item.date);
+
+        let div = document.createElement("div");
+        div.className = "card " + getColor(days);
+
+        div.innerHTML = `
+            <b>${item.name}</b><br>
+            ${item.date}<br>
+            осталось ${days} дней<br>
+            <button onclick="deleteItem(${i})">удалить</button>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+render();
+body {
+    font-family: Arial;
+    background: #f2f2f7;
+}
+
+.card {
+    background: white;
+    padding: 10px;
+    margin: 8px;
+    border-radius: 10px;
+}
+
+.red { border-left: 5px solid red; }
+.orange { border-left: 5px solid orange; }
+.green { border-left: 5px solid green; }
